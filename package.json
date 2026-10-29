@@ -1,0 +1,13 @@
+{
+  "name": "cofre-financas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cofre Finanças: controle de renda, gastos, cartões e dívidas (app web empacotado com Capacitor).",
+  "scripts": {
+    "dev": "npx serve www",
+    "assets": "capacitor-assets generate",
+    "sync": "cap sync",
+    "android": "cap open android",
+    "ios": "cap open ios"
+  }
+}

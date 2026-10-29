@@ -1,0 +1,14 @@
+{
+  "appId": "com.cofre.financas",
+  "appName": "Cofre",
+  "webDir": "www",
+  "backgroundColor": "#0E131B",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "launchAutoHide": true,
+      "backgroundColor": "#0E131B",
+      "showSpinner": false
+    }
+  }
+}

@@ -1,0 +1,230 @@
+/* ============================================================
+   ESTILO (CSS)
+   Ideia de layout: uma coluna só (máx. 480px), barra de abas fixa
+   embaixo, botão flutuante (+) e "gavetas" (bottom sheets) para formulários.
+   Visual escuro por padrão ("cofre": azul-tinta + dourado champanhe) e
+   uma versão clara que entra sozinha quando o celular está no modo claro.
+   ============================================================ */
+/* TOKENS DE DESIGN: todas as cores e fontes ficam em variáveis (--nome).
+   O resto do CSS só usa var(--nome). Para trocar o visual do app inteiro,
+   basta mudar os valores aqui. Este primeiro bloco é o tema ESCURO. */
+:root{
+  --bg:#0E131B; --surface:#161D28; --surface-2:#1E2735; --line:#2A3445;
+  --fg:#ECE8DF; --muted:#9AA4B4; --accent:#D8B672; --accent-ink:#1A1405;
+  --good:#5CC49A; --warn:#E5AB55; --bad:#EA7064; --scrim:rgba(5,8,12,.62);
+  --c-fixa:#7FA3E0; --c-flex:#E8906F; --c-reserva:#5FBFAF; --c-invest:#D8B672; --c-guardar:#A996DE;
+  --on-card:#fff;
+  --display:'DM Serif Display',Georgia,'Times New Roman',serif;
+  --body:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
+}
+/* TEMA CLARO: só redefine as variáveis. O @media detecta o modo do celular;
+   as regras [data-theme] permitem forçar um tema por código, se um dia você quiser um botão. */
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#F2F0EB; --surface:#FFFFFF; --surface-2:#EAE7E0; --line:#DDD9CF;
+    --fg:#1B2230; --muted:#5F6878; --accent:#8C6A25; --accent-ink:#FFFFFF;
+    --good:#1F8A62; --warn:#A66A0F; --bad:#C2392D; --scrim:rgba(20,24,32,.45);
+    --c-fixa:#3F67B5; --c-flex:#C2582F; --c-reserva:#1F8F7E; --c-invest:#8C6A25; --c-guardar:#6D58B8;
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F2F0EB; --surface:#FFFFFF; --surface-2:#EAE7E0; --line:#DDD9CF;
+  --fg:#1B2230; --muted:#5F6878; --accent:#8C6A25; --accent-ink:#FFFFFF;
+  --good:#1F8A62; --warn:#A66A0F; --bad:#C2392D; --scrim:rgba(20,24,32,.45);
+  --c-fixa:#3F67B5; --c-flex:#C2582F; --c-reserva:#1F8F7E; --c-invest:#8C6A25; --c-guardar:#6D58B8;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0E131B; --surface:#161D28; --surface-2:#1E2735; --line:#2A3445;
+  --fg:#ECE8DF; --muted:#9AA4B4; --accent:#D8B672; --accent-ink:#1A1405;
+  --good:#5CC49A; --warn:#E5AB55; --bad:#EA7064; --scrim:rgba(5,8,12,.62);
+  --c-fixa:#7FA3E0; --c-flex:#E8906F; --c-reserva:#5FBFAF; --c-invest:#D8B672; --c-guardar:#A996DE;
+  color-scheme:dark;
+}
+/* BASE NATIVA: no Cofre web o "esqueleto" do artefato fazia isto; no app precisamos declarar.
+   env(safe-area-inset-*) é o espaço de entalhe/barra de status/barra de gestos do aparelho. */
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font:400 15px/1.45 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:12px 120px;
+  -webkit-text-size-adjust:100%;
+}
+.app{max-width:480px;margin-inline:auto;display:flex;flex-direction:column;gap:20px;min-width:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+h1,h2,h3,p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+/* ----- TOPO: marca "Cofre." e seletor de mês ----- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:4px}
+.brand{font-family:var(--display);font-size:24px;letter-spacing:.01em}
+.brand span{color:var(--accent)}
+.month{display:flex;align-items:center;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.month button{width:34px;height:34px;border-radius:999px;display:grid;place-items:center;color:var(--muted)}
+.month button:hover{background:var(--surface-2);color:var(--fg)}
+.month b{font-size:13px;font-weight:700;min-width:104px;text-align:center}
+
+/* ----- BLOCOS: cartão genérico, seções, cartão principal (hero), barras de progresso, pílulas ----- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
+.section{display:flex;flex-direction:column;gap:10px;min-width:0}
+.section>h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hero{
+  border-radius:22px;padding:20px 18px 18px;border:1px solid var(--line);
+  background:
+    radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--accent) 20%,transparent),transparent 60%),
+    linear-gradient(170deg,var(--surface-2),var(--surface));
+  display:flex;flex-direction:column;gap:14px;min-width:0;
+}
+.hero-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.big{font-family:var(--display);font-size:clamp(34px,10.5vw,46px);line-height:1.05;letter-spacing:-.01em;font-weight:400}
+.chip-btn{font-size:12px;font-weight:700;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:999px;padding:6px 12px;white-space:nowrap}
+.chip-btn:hover{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.stack{display:flex;height:10px;border-radius:999px;overflow:hidden;gap:2px;background:var(--surface-2)}
+.stack i{display:block;height:100%;min-width:2px}
+.legend{display:flex;flex-direction:column;gap:2px}
+.lg{display:grid;grid-template-columns:10px 1fr auto auto;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.lg:first-child{border-top:0}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.lg .pct{color:var(--muted);font-size:13px;min-width:38px;text-align:right}
+.lg .amt{font-weight:700;min-width:92px;text-align:right}
+.lg .nm{min-width:0;overflow-wrap:anywhere}
+
+.bar{height:8px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px}
+.bud{display:flex;flex-direction:column;gap:8px}
+.bud-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.bud-h b{font-weight:700}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--surface-2)}
+.pill.good{color:var(--good)} .pill.warn{color:var(--warn)} .pill.bad{color:var(--bad)}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kv div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.kv b{font-size:15px;overflow-wrap:anywhere}
+
+/* ----- LISTAS: linhas de gastos, botões, estado vazio, filtros ----- */
+.list{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:10px 1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row .t{min-width:0}
+.row .t b{display:block;font-weight:600;overflow-wrap:anywhere}
+.row .t span{font-size:12.5px;color:var(--muted)}
+.row .v{font-weight:700;text-align:right}
+.icon-btn{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
+.icon-btn:hover{background:var(--surface-2);color:var(--bad)}
+.row.no-del{grid-template-columns:10px 1fr auto}
+.empty{padding:22px 8px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:12px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--accent-ink);font-weight:800;border-radius:14px;padding:13px 18px;min-height:46px}
+.btn:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.block{width:100%}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.banner{display:flex;gap:12px;align-items:center;justify-content:space-between;border:1px dashed color-mix(in srgb,var(--accent) 55%,transparent);border-radius:14px;padding:10px 12px;font-size:13px}
+
+/* ----- CARTÕES DE CRÉDITO: gradiente feito com color-mix a partir de uma cor (--cardc) ----- */
+.cc{
+  position:relative;color:var(--on-card);border-radius:20px;padding:18px;min-height:176px;display:flex;flex-direction:column;justify-content:space-between;gap:16px;text-align:left;width:100%;
+  background:
+    radial-gradient(90% 70% at 100% 0%,rgba(255,255,255,.2),transparent 60%),
+    linear-gradient(135deg,color-mix(in srgb,var(--cardc) 78%,#0a0d12),color-mix(in srgb,var(--cardc) 38%,#0a0d12));
+  box-shadow:0 10px 26px -14px rgba(0,0,0,.6);min-width:0;
+}
+.cc .nm{font-weight:800;font-size:17px;letter-spacing:.01em;overflow-wrap:anywhere}
+.cc .top2{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.cc .tag{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.8;font-weight:700}
+.cc .av{font-family:var(--display);font-size:30px;line-height:1.1}
+.cc .meter{height:6px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden}
+.cc .meter i{display:block;height:100%;background:var(--on-card);border-radius:999px}
+.cc .foot{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;opacity:.92;flex-wrap:wrap}
+.cc .inner{display:flex;flex-direction:column;gap:8px}
+
+/* ----- PLANO: sliders de percentual e campos de formulário ----- */
+.slider{display:flex;flex-direction:column;gap:6px;padding:12px 0;border-top:1px solid var(--line)}
+.slider:first-of-type{border-top:0}
+.slider .h{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.slider input[type=range]{width:100%;height:28px;margin:0}
+.fld{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.fld input,.fld select{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:16px;font-weight:600;color:var(--fg);width:100%;min-width:0}
+.fld input:focus,.fld select:focus{border-color:var(--accent);outline:none}
+.inline{display:flex;gap:8px;align-items:flex-end}
+.inline .fld{flex:1}
+.ap{display:flex;flex-direction:column;gap:10px}
+.note{font-size:12.5px;color:var(--muted)}
+.err{color:var(--bad);font-size:13px;font-weight:600}
+
+/* ----- BARRA DE ABAS fixa embaixo (respeita a área segura do aparelho) ----- */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;
+  padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.nav-in{max-width:480px;margin-inline:auto;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;gap:2px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11px;font-weight:700;color:var(--muted);border-radius:12px}
+.tab svg{width:22px;height:22px}
+.tab[aria-current="page"]{color:var(--accent)}
+.fab{position:fixed;z-index:25;right:max(16px,calc((100vw - 480px)/2 + 16px),env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));height:48px;padding:0 18px 0 14px;border-radius:16px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;box-shadow:0 10px 24px -10px color-mix(in srgb,var(--accent) 75%,transparent)}
+.fab svg{width:20px;height:20px}
+.fab:hover{filter:brightness(1.06)}
+
+/* ----- TELA DE ABERTURA: some sozinha por animação CSS (splashOut) depois de 1,7s ----- */
+.splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:radial-gradient(80% 55% at 50% 38%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 70%),var(--bg);
+  animation:splashOut .45s ease 1.7s forwards}
+.splash .logo{width:104px;height:104px;border-radius:30px;display:grid;place-items:center;padding-bottom:8px;
+  background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 90%,#fff),color-mix(in srgb,var(--accent) 68%,#3a2a05));
+  color:var(--accent-ink);font-family:var(--display);font-size:74px;line-height:1;
+  box-shadow:0 18px 40px -16px color-mix(in srgb,var(--accent) 70%,transparent),inset 0 1px 0 rgba(255,255,255,.35)}
+.splash .wm{font-family:var(--display);font-size:32px;letter-spacing:.01em}
+.splash .tg{color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+.splash .ld{width:120px;height:3px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:8px}
+.splash .ld i{display:block;height:100%;background:var(--accent);transform-origin:left}
+@keyframes splashOut{to{opacity:0;visibility:hidden}}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+@keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:no-preference){
+  .splash .logo{animation:pop .6s cubic-bezier(.2,.8,.2,1) both}
+  .splash .wm{animation:rise .5s ease .25s both}
+  .splash .tg{animation:rise .5s ease .4s both}
+  .splash .ld i{animation:fill 1.6s ease-out both}
+}
+@media (prefers-reduced-motion:reduce){.splash{animation-duration:.01s;animation-delay:.9s}}
+
+/* ----- DÍVIDAS: número de prioridade (.rank) e linha de cada dívida ----- */
+.rank{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;background:var(--surface-2);color:var(--muted)}
+.rank.first{background:var(--accent);color:var(--accent-ink)}
+.debt{display:grid;grid-template-columns:30px 1fr auto;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--line);width:100%;text-align:left}
+.debt:first-child{border-top:0}
+.debt .t{min-width:0;display:flex;flex-direction:column;gap:2px}
+.debt .t b{font-weight:700;overflow-wrap:anywhere}
+.debt .t span{font-size:12.5px;color:var(--muted)}
+.debt .v{text-align:right;display:flex;flex-direction:column;gap:2px;align-items:flex-end}
+.debt .v b{font-weight:800}
+.debt .v span{font-size:12px;color:var(--muted)}
+
+/* ----- GAVETA (formulários) e AVISO TEMPORÁRIO (toast) ----- */
+.backdrop{position:fixed;inset:0;z-index:40;background:var(--scrim)}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-width:480px;margin-inline:auto;max-height:92%;overflow:auto;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:24px 24px 0 0;padding:20px max(16px,env(safe-area-inset-left,0px)) calc(22px + env(safe-area-inset-bottom,0px))}
+.sheet h2{font-family:var(--display);font-weight:400;font-size:26px;margin-bottom:14px}
+.sheet form{display:flex;flex-direction:column;gap:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.two>*{min-width:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--fg);color:var(--bg);font-weight:700;font-size:14px;padding:11px 16px;border-radius:14px;display:flex;gap:14px;align-items:center;max-width:calc(100% - 32px)}
+.toast button{color:var(--accent-ink);background:var(--accent);border-radius:8px;padding:4px 10px;font-weight:800;font-size:13px}
+@media (prefers-reduced-motion:no-preference){
+  .bar i,.stack i,.cc .meter i{transition:width .35s ease}
+  .sheet{animation:up .22s ease-out}
+  @keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+}
+@media (max-width:360px){.kv{grid-template-columns:1fr 1fr}.lg .amt{min-width:0}}
