@@ -1,4 +1,5 @@
 node_modules/
+.netlify/
 android/app/build/
 android/.gradle/
 ios/App/Pods/
